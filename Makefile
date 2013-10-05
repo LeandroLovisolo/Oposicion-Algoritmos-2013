@@ -1,9 +1,10 @@
-all: presentacion.pdf cv.pdf
+.PHONY: all clean
+
+all: presentacion.pdf
 
 presentacion.pdf: presentacion.tex
 	pdflatex -halt-on-error presentacion.tex
 	pdflatex -halt-on-error presentacion.tex
 
-cv.pdf: cv.tex
-	pdflatex -halt-on-error cv.tex
-	pdflatex -halt-on-error cv.tex
+clean:
+	rm -f *.pdf *.snm *.toc *.out *.log *.aux *.nav
