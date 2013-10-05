@@ -1,0 +1,83 @@
+Contexto: AyED III. Primera clase práctica de programación dinámica, posterior a la clase teórica de técnicas algorítmicas.
+
+Prerequisitos: Haber resuelto al menos un problema sencillo de optimización por PD.
+
+Objetivos pedagógicos:
+ - Cementar con un ejemplo concreto lo visto en la clase teórica.
+ - Practicar caracterización de la estructura de una solución óptima e identificación de solapamiento de subproblemas y subestructura óptima.
+ - Aprender a reescribir de forma iterativa un algoritmo de PD escrito en forma recursiva.
+ - Ver cómo construir una solución óptima luego de haber computado el valor de la misma.
+ - Ver distintos métodos para dar cotas de complejidad para algoritmos de PD.
+
+Instancias de evaluación que incluyen el tema presentado:
+- Primer parcial.
+- Segundo trabajo práctico.
+
+Bibliografía:
+- Introduction to Algorithms - Cormen, Leiserson, Rivest, Stein - 3ra edición
+
+Comienza la clase. 
+
+Diapositiva 1: Presentación.
+
+Hacemos un muy breve repaso charlado sobre programación dinámica: les pregunto a los alumnos qué características debe tener un problema para ser candidato a ser resuelto con esta técnica y les pido ejemplos de problemas en los que se puede aplicar.
+
+Diapositiva 2: Problema.
+
+Leemos el enunciado. Le pido a la clase ideas sobre cómo plantear el problema de la forma más naïve posible. Caracterizamos entre todos la estructura de una solución óptima. Bosquejamos en el pizarrón alguna solución que surja de lo que los alumnos propongan. Copiamos al pizarrón la instancia del problema de tamaño 4 x 4 presente en la diapositiva.
+
+Diapositiva 3: Recurrencia.
+
+Discutimos la fórmula recursiva de la diapositiva para computar el valor óptimo de la solución. Pido a la clase que me cante el costo del camino óptimo de las tres casillas contíguas a la esquina inferior derecha para asegurarme que hayan entendido la fórmula y que estén de acuerdo con la idea.
+
+Recordamos otra vez qué características debe tener un problema para ser candidato a resolverse por programación dinámica. Pido a la clase ideas sobre cómo ver si hay subproblemas que se solapan.
+
+Diapositiva 4: Solapamiento de Subproblemas.
+
+Charlamos el ejemplo concreto de la diapositiva. Dibujamos en el pizarrón parte del árbol de recursión que resultaría de la instancia de ejemplo para convencernos que en efecto ocurre la superposición de subproblemas.
+
+Pido ideas sobre cómo determinar si el problema exhibe subestructura óptima. Le recuerdo a la clase el argumento cut-and-paste y le pregunto cómo aplicarlo en este caso.
+
+Diapositiva 5: Subestructura Óptima.
+
+Leemos el planteo propuesto en la diapositiva y lo ejemplificamos con un camino concreto de la instancia que venimos tratando en el pizarrón. Vemos exactamente cómo se aplica el argumento cut-and-paste, en este caso gráficamente: trazamos el camino original, reemplazamos una sección del mismo por otra de costo supuestamente inferior y vemos que llegamos a un absurdo.
+
+Pido propuestas sobre cómo resolver el problema por programación dinámica de forma recursiva. Propongo mirar la fórmula de recurrencia original y preguntarnos qué haría falta cambiar para evitar computar un mismo subproblema más de una vez.
+
+Diapositiva 6: Función de Costo Top Down.
+
+Charlamos la implementación propuesta en la diapositiva. Dibujamos en el pizarrón la tabla de memoización, inicialmente con todas sus celdas con valor -1.
+
+Señalo la posición inicial en la matriz de la instancia del pizarrón, y le pido a la clase que me guíe en la ejecución del algoritmo recursivo hasta haber completado algunas celdas de la tabla de memoización y asegurarme que hayan entendido el algoritmo.
+
+Completo rápidamente el resto de la tabla. Verificamos que la coordenada (1,1) de la tabla de memoización coincide con el costo óptimo que habíamos visto en la diapositiva 2.
+
+Pido ideas sobre cómo reescribir el algoritmo de forma iterativa. Pregunto en qué orden deberíamos recorrer la matriz del problema. Si no hay propuestas, sugiero partir del caso base y observar qué subproblemas dependen únicamente de éste. Discutimos distintos órdenes posibles: en diagonal, verticalmente, etc.
+
+Diapositiva 7: Función de Costo Bottom Up.
+
+Propongo el orden vertical presentado en la diapositiva. Dibujamos en el pizarrón una nueva tabla de memoización y hacemos el seguimiento del algoritmo hasta haber completado una o dos columnas de la misma y estar de acuerdo en que funciona.
+
+Completo rápidamente el resto de la tabla y verificamos que los valores computados son idénticos a los de la tabla de memoización de la versión recursiva.
+
+Pregunto a la clase cómo podemos construir una solución a partir de la tabla de valores que obtuvimos luego de ejecutar el algoritmo.
+
+Señalo la celda (1,1) de la tabla de memoización y de la matriz del problema, y mirando los valores de ambas celdas pregunto en qué dirección creen que continúa el camino óptimo. Vemos que avanzando hacia la derecha los números no cierran (18 + 2 =/= 21), por lo tanto sólo puede continuar hacia abajo. Repetimos el procedimiento dos o tres veces hasta que la idea haya quedado clara.
+
+Diapositiva 8: Construcción de una Solución Óptima
+
+Observamos en la diapositiva la solución completa y repasamos la idea de ser necesario.
+
+Pido ideas sobre cómo dar una cota de complejidad para el algoritmo. Retrocedemos hasta la diapositiva del algoritmo bottom up para analizar los ciclos anidados. Deducimos rápidamente una cota O(m x n).
+
+Retrocedemos hasta la diapositiva del algoritmo top down. Pido propuestas para deducir la cota de complejidad, suponiendo que desconociéramos cómo reescribir el algoritmo de forma iterativa.
+
+Diapositiva 9: Análisis de Complejidad.
+
+Muestro que por cada llamada recursiva que realizamos estamos completando un valor de la tabla de memoización, y que entonces nunca se van a realizar más llamadas recursivas que las necesarias para completar la tabla. Por lo tanto podemos deducir una cota de complejidad a partir de la dimensión de la tabla, sin necesidad de complicarnos analizando el árbol de recursión o planteando relaciones de recurrencia.
+
+Finalmente comparo la complejidad hallada con la de la versión naïve de éste algoritmo. Pensamos entre todos qué altura tendría el árbol binario de recursión y recordando la fórmula para obtener la cantidad máxima de nodos en un aŕbol de altura h, damos una cota superior para la cantidad de llamadas recursivas que se realizan en función del tamaño de la matriz del problema, que resulta ser de orden exponencial.
+
+Respondo dudas en caso de haberlas.
+
+Fin de la clase.

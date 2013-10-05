@@ -1,0 +1,294 @@
+\documentclass[spanish]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-ucroman, es-noquoting]{babel}
+\usepackage{tikz} % Requerido dibujar los circulos en las casillas de las matrices
+\usepackage{amsmath}
+\usepackage[noend]{algpseudocode}
+\usepackage{qtree} % Requerido para dibujar árboles
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Modo handout (comentar para versión presentación en pantalla/proyector)
+\usepackage{pgfpages}
+\pgfpagesuselayout{4 on 1}[a4paper, landscape, border shrink=5mm]
+\setbeamertemplate{background canvas}{
+    \tikz \draw (current page.north west) rectangle (current page.south east);
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Quitar controles de navegación
+\usenavigationsymbolstemplate{}
+
+% Numerar las transparencias
+\setbeamertemplate{footline}[frame number]
+
+% Macro para marcar las casillas que componen los caminos
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=1pt] (char) {\hphantom{00}};
+    \node[inner sep=1pt] (char) {#1};
+}}
+
+% Indentación del pseudocódigo
+\algrenewcommand\algorithmicindent{1.0em}
+
+\title{Programación Dinámica}
+\subtitle{
+    Algoritmos y Estructuras de Datos III \\
+    \vspace{2em}
+    Prueba de Oposición \\
+    Ayudantía de Segunda \\
+    Área Algoritmos
+}
+\author{Leandro Lovisolo \\ \footnotesize{\texttt{<leandro@leandro.me>}}}
+\date{26 de Septiembre de 2013}
+\institute{
+    Departamento de Computación \\
+    Facultad de Ciencias Exactas y Naturales \\
+    Universidad de Buenos Aires
+}
+
+\begin{document}
+    \begin{frame}
+        \titlepage
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Problema}
+        \framesubtitle{Resolvamos un problema aplicando la técnica de programación dinámica}
+
+        \begin{block}{Recorriendo una matriz}
+            Sea $A \in \mathbb{N}^{m \times n}$ una matriz de números naturales. Se desea obtener un camino que empiece en la casilla superior izquierda $(1, 1)$ y termine en la casilla inferior derecha $(m, n)$, tal que minimice la suma de los valores de las casillas por las que pasa. En cada casilla $(i, j)$ hay a lo sumo dos movimientos posibles: ir hacia abajo $(i + 1, j)$ o ir hacia la derecha $(i, j + 1)$.
+        \end{block}
+
+        \begin{example}
+            \begin{columns}
+                \column{.4\textwidth}
+                $$
+                A =
+                \begin{bmatrix}
+                    \circled{2} & 8           & 3           & 4 \\
+                    \circled{5} & 3           & 4           & 5 \\
+                    \circled{1} & \circled{2} & \circled{2} & \circled{1} \\
+                    3           & 4           & 6           & \circled{5}
+                \end{bmatrix}
+                $$
+
+                \column{.4\textwidth}
+                Valor de la solución:
+                $$2 + 5 + 1 + 2 + 2 + 1 + 5 = 18$$
+            \end{columns}
+        \end{example}
+    \end{frame}
+    
+    \begin{frame}
+        \frametitle{Fórmula Recursiva}
+        \framesubtitle{Definamos recursivamente el valor de una solución óptima}
+
+        \begin{block}{Función de costo:}
+            $c(i, j) =$ costo mínimo de desplazarnos desde $(i, j)$ hasta $(m, n)$.
+        \end{block}
+
+        \begin{block}{Caso base:}
+            $c(m, n) = a_{m,n}$
+        \end{block}
+
+        \begin{block}{Fórmula recursiva:}
+            \vspace{0.5em}
+            $
+            c(i, j) =
+            \left\{
+                \begin{array}{ll}
+                    a_{i,j} + min\{ c(i + 1, j), c(i, j + 1) \} & \mbox{si } i < m \mbox{ y } j < n \\
+                    a_{i,j} + c(i + 1, j)                       & \mbox{si } i < m \mbox{ y } j = n \\
+                    a_{i,j} + c(i, j + 1)                       & \mbox{si } i = m \mbox{ y } j < n \\
+                    a_{m,n}                                     & \mbox{si } i = m \mbox{ y } j = n \\
+                \end{array}
+            \right.
+            $
+        \end{block}
+
+        \begin{block}{Queremos hallar:}
+            $c(1, 1)$. Es decir, el costo mínimo de desplazarnos desde $(1, 1)$ hasta $(m, n)$.
+        \end{block}
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Solapamiento de Subproblemas}
+        \framesubtitle{Veamos que algunos subproblemas se computan más de una vez}
+
+        Para computar $c(1, 1)$ necesitamos computar $c(2, 1)$ y $c(1, 2)$, pues
+
+        \begin{center}
+            $c(1, 1) =  a_{1,1} + min\{ c(2, 1), c(1, 2)\}$.
+        \end{center}
+
+        Para computar $c(2, 1)$ y $c(1, 2)$ necesitamos computar $c(2, 2)$, pues
+
+        \begin{center}
+            $c(2, 1) =  a_{1,1} + min\{ c(3, 1), c(2, 2)\}$, y \\
+            $c(1, 2) =  a_{1,1} + min\{ c(2, 2), c(1, 3)\}$.
+        \end{center}
+
+        Ambos subproblemas requieren conocer el valor de $c(2, 2)$. Entonces $c(2, 2)$ se computa más de una vez.
+
+        \vspace{1em}
+
+        Luego, el problema exhibe \textbf{solapamiento de subproblemas}.
+
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Subestructura Óptima}
+        \framesubtitle{Veamos que las soluciones de los subproblemas también son soluciones óptimas}
+
+        Sea $\Sigma p$ la suma de las casillas por las que pasa un camino $p$.
+
+        \vspace{1em}
+
+        Sea $p = \{(1, 1), \ldots, (i_k, j_k), (i_{k+1}, j_{k+1}), \ldots, (m, n)\}$ un camino con costo mínimo entre $(1,1)$ y $(m,n)$.
+
+        \vspace{1em}
+
+        Descompongamos $p$ en dos caminos $p_1 = \{(1, 1), \ldots, (i_k, j_k)\}$ y $p_2 = \{(i_{k+1}, j_{k+1}), \ldots, (m, n)\}$, de manera que $p = p_1 \cup p_2$.
+
+        \vspace{1em}
+
+        Supongamos que existe otro camino $p'_2$ entre $(i_{k+1}, j_{k+1})$ y $(m,n)$ tal que $\Sigma p'_2 < \Sigma p_2$, y sea $p' = p_1 \cup p'_2$.
+
+        \vspace{1em}
+
+        Entonces $\Sigma p' = \Sigma p_1 + \Sigma p'_2 < \Sigma p_1 + \Sigma p_2 = \Sigma p$.
+
+        \vspace{1em}
+
+        Absurdo, pues $p$ es un camino con costo mínimo.
+
+        \vspace{1em}
+
+        Luego, el problema exhibe \textbf{subestructura óptima}.
+
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Función de Costo Top Down}
+        \framesubtitle{Resolvamos el problema recursivamente, resolviendo cada subproblema sólo una vez}
+
+        El problema exhibe solapamiento de subproblemas y subestructura óptima, o sea que podemos aplicar la técnica de programación dinámica.
+
+        \vspace{1em}
+
+        \begin{algorithmic}
+            \State $dp \leftarrow arreglo[m][n]$ de enteros con valor inicial $-1$
+            \Procedure{c}{$A, i, j$}
+                \If{$i > m$ \textbf{or} $j > n$} \Comment{posición inválida}
+                    \State \textbf{return} $\infty$
+                \EndIf
+                \If{$dp[i][j] = -1$} \Comment{se computa sólo una vez}
+                    \If{$i = m$ \textbf{and} $j = n$} \Comment{caso base}
+                        \State $dp[i][j] = A[i][j]$
+                    \Else \Comment{caso general}
+                        \State $dp[i][j] = A[i][j] + min\{ \textsc{c}(A, i + 1, j), \textsc{c}(A, i, j + 1) \}$
+                    \EndIf
+                \EndIf
+                \State \textbf{return} $dp[i][j]$
+            \EndProcedure
+        \end{algorithmic}
+
+
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Función de Costo Bottom Up}
+        \framesubtitle{Reescribamos la función anterior de forma iterativa}
+
+        Recorremos la matriz de abajo a arriba y de derecha a izquierda, partiendo de $(m,n)$ y terminando en $(1, 1)$.
+
+        \vspace{1em}
+
+        \small{
+            \begin{algorithmic}
+                \Procedure{c}{$A$}
+                    \State $dp \leftarrow arreglo[m][n]$ de enteros
+                    \For{$j \leftarrow n$ \textbf{to} $1$}
+                        \For{$i \leftarrow m$ \textbf{to} $1$}
+                            \If{$i < m$ \textbf{and} $j < n$} \Comment{caso general}
+                                \State $dp[i][j] \leftarrow A[i][j] + min\{ dp[i+1][j], dp[i][j+1] \}$
+                            \ElsIf{$i < m$ \textbf{and} $j = n$} \Comment{última columna}
+                                \State $dp[i][j] \leftarrow A[i][j] + dp[i+1][j]$
+                            \ElsIf{$i = m$ \textbf{and} $j < n$} \Comment{última fila}
+                                \State $dp[i][j] \leftarrow A[i][j] + dp[i][j+1]$
+                            \Else \mbox{ } $dp[i][j] \leftarrow A[i][j]$  \Comment{caso base}
+                            \EndIf
+                        \EndFor
+                    \EndFor
+                    \State \textbf{return} $dp[1][1]$
+                \EndProcedure
+            \end{algorithmic}
+        }
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Construcción de una Solución Óptima}
+        \framesubtitle{Ya sabemos el costo del camino óptimo; ahora hallemos ése camino}
+
+        Construimos el camino óptimo mirando la matriz $dp$ donde guardamos los valores del camino óptimo hacia $(m, n)$ desde cada coordenada $(i, j)$.
+
+        \vspace{1em}
+
+        Nos paramos en $dp_{1,1}$, marcamos esa coordenada y nos movemos a la casilla contigua cuyo valor sea menor (sólo hacia la derecha ó abajo.) Repetimos hasta llegar a $dp_{m,n}$.
+
+        \begin{columns}
+            \column{.4\textwidth}
+            $$
+            A =
+            \begin{bmatrix}
+                \circled{2} & 8           & 3           & 4 \\
+                \circled{5} & 3           & 4           & 5 \\
+                \circled{1} & \circled{2} & \circled{2} & \circled{1} \\
+                3           & 4           & 6           & \circled{5}
+            \end{bmatrix}
+            $$
+
+            \column{.4\textwidth}
+            $$
+            dp =
+            \begin{bmatrix}
+                \circled{18} & 21           & 15          & 15 \\
+                \circled{16} & 13           & 12          & 11 \\
+                \circled{11} & \circled{10} & \circled{8} & \circled{6} \\
+                18           & 15           & 11          & \circled{5}
+            \end{bmatrix}
+            $$
+        \end{columns}
+
+        \vspace{1em}
+
+        El camino óptimo es entonces el conjunto de coordenadas que marcamos hasta llegar a $(m, n)$.
+    \end{frame}
+
+    \begin{frame}
+        \frametitle{Análisis de Complejidad}
+        \framesubtitle{Comparemos nuestro algoritmo con la versión \textit{naïve}}
+
+        \begin{block}{Aplicando programación dinámica}
+            Llenamos un arreglo de dimensión $m \times n$ con costo $O(1)$ por coordenada. Cota de complejidad total: $O(m \times n)$.
+        \end{block}
+
+        \begin{block}{Versión \textit{naïve}}
+            \begin{columns}
+                \column{.55\textwidth}
+                Se produce un árbol (binario) de recursión de altura $m + n$. La cantidad máxima de nodos en un árbol de esta altura es $2^{m + n + 1} - 1$.
+
+                \vspace{1em}
+
+                La complejidad total está entonces acotada por $O(2^{m + n + 1})$.
+
+                \column{.35\textwidth}
+
+                \small{
+                    \Tree [.$(1,1)$ [ .$(2,1)$ [.$(3,1)$ {\ldots} ] [.$(2,2)$ {\ldots} ] ]
+                                    [ .$(1,2)$ [.$(2,2)$ {\ldots} ] [.$(1,3)$ {\ldots} ] ] ]
+                }
+            \end{columns}
+        \end{block}
+    \end{frame}
+\end{document}
